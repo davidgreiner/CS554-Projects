@@ -8,7 +8,7 @@ Eugene Zhang, 2005
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "glut.h"
+#include <GLUT/glut.h>
 #include <string.h>
 #include <fstream>
 #include "ply.h"
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
   progname = argv[0];
 
-	this_file = fopen("../tempmodels/bunny.ply", "r");
+	this_file = fopen("/Users/davidgreiner/Documents/OSU/Fall/CS554/CS554\ Project\ 1/tempmodels/bunny.ply", "r");
 	poly = new Polyhedron (this_file);
 	fclose(this_file);
 	mat_ident( rotmat );	
@@ -212,9 +212,9 @@ Polyhedron::Polyhedron(FILE *file)
 
   /* fix up vertex pointers in triangles */
   for (i = 0; i < ntris; i++) {
-    tlist[i]->verts[0] = vlist[(int) tlist[i]->verts[0]];
-    tlist[i]->verts[1] = vlist[(int) tlist[i]->verts[1]];
-    tlist[i]->verts[2] = vlist[(int) tlist[i]->verts[2]];
+    tlist[i]->verts[0] = vlist[(int)(size_t) tlist[i]->verts[0]];
+    tlist[i]->verts[1] = vlist[(int)(size_t) tlist[i]->verts[1]];
+    tlist[i]->verts[2] = vlist[(int)(size_t) tlist[i]->verts[2]];
   }
 
   /* get rid of triangles that use the same vertex more than once */

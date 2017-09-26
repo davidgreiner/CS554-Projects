@@ -11,7 +11,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include "tmatrix.h"
 #include "trackball.h"
 
@@ -370,8 +369,8 @@ static void minvert(const Matrix mat, Matrix result)
 /*
  * Local function prototypes (not defined in trackball.h)
  */
-float tb_project_to_sphere(float, float, float);
-void normalize_quat(float [4]);
+static float tb_project_to_sphere(float, float, float);
+static void normalize_quat(float [4]);
 
 /*
  * Ok, simulate a track-ball.  Project the points onto the virtual
