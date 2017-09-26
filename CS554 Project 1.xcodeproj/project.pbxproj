@@ -7,7 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3A870CD91F7A010000D6DA30 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CD81F7A010000D6DA30 /* main.cpp */; };
+		3A870CEB1F7A012900D6DA30 /* tmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CDF1F7A012700D6DA30 /* tmatrix.cpp */; };
+		3A870CEC1F7A012900D6DA30 /* learnply.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CE01F7A012800D6DA30 /* learnply.cpp */; };
+		3A870CED1F7A012900D6DA30 /* ply.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CE61F7A012800D6DA30 /* ply.cpp */; };
+		3A870CEE1F7A012900D6DA30 /* trackball.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CE81F7A012800D6DA30 /* trackball.cpp */; };
+		3A870CEF1F7A012900D6DA30 /* icVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A870CEA1F7A012900D6DA30 /* icVector.cpp */; };
+		3A870CF21F7A026000D6DA30 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A870CF11F7A026000D6DA30 /* GLUT.framework */; };
+		3A870CF41F7A02C200D6DA30 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A870CF31F7A02C200D6DA30 /* OpenGL.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +30,20 @@
 
 /* Begin PBXFileReference section */
 		3A870CD51F7A010000D6DA30 /* CS554 Project 1 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "CS554 Project 1"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3A870CD81F7A010000D6DA30 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		3A870CDF1F7A012700D6DA30 /* tmatrix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = tmatrix.cpp; sourceTree = "<group>"; };
+		3A870CE01F7A012800D6DA30 /* learnply.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = learnply.cpp; sourceTree = "<group>"; };
+		3A870CE11F7A012800D6DA30 /* trackball.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trackball.h; sourceTree = "<group>"; };
+		3A870CE21F7A012800D6DA30 /* tmatrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = tmatrix.h; sourceTree = "<group>"; };
+		3A870CE31F7A012800D6DA30 /* icVector.H */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = icVector.H; sourceTree = "<group>"; };
+		3A870CE41F7A012800D6DA30 /* learnply_io.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = learnply_io.h; sourceTree = "<group>"; };
+		3A870CE51F7A012800D6DA30 /* learnply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = learnply.h; sourceTree = "<group>"; };
+		3A870CE61F7A012800D6DA30 /* ply.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ply.cpp; sourceTree = "<group>"; };
+		3A870CE71F7A012800D6DA30 /* ply.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ply.h; sourceTree = "<group>"; };
+		3A870CE81F7A012800D6DA30 /* trackball.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = trackball.cpp; sourceTree = "<group>"; };
+		3A870CE91F7A012800D6DA30 /* icMatrix.H */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = icMatrix.H; sourceTree = "<group>"; };
+		3A870CEA1F7A012900D6DA30 /* icVector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = icVector.cpp; sourceTree = "<group>"; };
+		3A870CF11F7A026000D6DA30 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		3A870CF31F7A02C200D6DA30 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +51,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A870CF41F7A02C200D6DA30 /* OpenGL.framework in Frameworks */,
+				3A870CF21F7A026000D6DA30 /* GLUT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +64,7 @@
 			children = (
 				3A870CD71F7A010000D6DA30 /* CS554 Project 1 */,
 				3A870CD61F7A010000D6DA30 /* Products */,
+				3A870CF01F7A026000D6DA30 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,9 +79,29 @@
 		3A870CD71F7A010000D6DA30 /* CS554 Project 1 */ = {
 			isa = PBXGroup;
 			children = (
-				3A870CD81F7A010000D6DA30 /* main.cpp */,
+				3A870CE91F7A012800D6DA30 /* icMatrix.H */,
+				3A870CEA1F7A012900D6DA30 /* icVector.cpp */,
+				3A870CE31F7A012800D6DA30 /* icVector.H */,
+				3A870CE41F7A012800D6DA30 /* learnply_io.h */,
+				3A870CE01F7A012800D6DA30 /* learnply.cpp */,
+				3A870CE51F7A012800D6DA30 /* learnply.h */,
+				3A870CE61F7A012800D6DA30 /* ply.cpp */,
+				3A870CE71F7A012800D6DA30 /* ply.h */,
+				3A870CDF1F7A012700D6DA30 /* tmatrix.cpp */,
+				3A870CE21F7A012800D6DA30 /* tmatrix.h */,
+				3A870CE81F7A012800D6DA30 /* trackball.cpp */,
+				3A870CE11F7A012800D6DA30 /* trackball.h */,
 			);
 			path = "CS554 Project 1";
+			sourceTree = "<group>";
+		};
+		3A870CF01F7A026000D6DA30 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3A870CF31F7A02C200D6DA30 /* OpenGL.framework */,
+				3A870CF11F7A026000D6DA30 /* GLUT.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +161,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A870CD91F7A010000D6DA30 /* main.cpp in Sources */,
+				3A870CED1F7A012900D6DA30 /* ply.cpp in Sources */,
+				3A870CEF1F7A012900D6DA30 /* icVector.cpp in Sources */,
+				3A870CEB1F7A012900D6DA30 /* tmatrix.cpp in Sources */,
+				3A870CEE1F7A012900D6DA30 /* trackball.cpp in Sources */,
+				3A870CEC1F7A012900D6DA30 /* learnply.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
