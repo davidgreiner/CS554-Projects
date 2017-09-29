@@ -189,6 +189,8 @@ public:
 	icVector3 center;
 	double radius;
 	double area;
+    
+    icVector3 min, max;
 
 	int seed;
 
@@ -204,6 +206,7 @@ public:
   Triangle *find_common_edge(Triangle *, Vertex *, Vertex *);
   Triangle *other_triangle(Edge *, Triangle *);
 	void calc_bounding_sphere();
+    void calc_aabb();
 	void calc_face_normals_and_area();
 	void calc_edge_length();
 
