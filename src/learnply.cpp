@@ -8,7 +8,11 @@ Eugene Zhang, 2005
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#ifdef __APPLE__
 #include <GLUT/glut.h>
+#elif defined _WIN32 || defined _WIN64
+#include "glut.h"
+#endif 
 #include <string.h>
 #include <fstream>
 #include "ply.h"
@@ -79,7 +83,7 @@ int main(int argc, char *argv[])
 
   progname = argv[0];
 
-	this_file = fopen("/Users/davidgreiner/Documents/OSU/Fall/CS554/CS554\ Project\ 1/tempmodels/dragon.ply", "r");
+	this_file = fopen("../tempmodels/bunny.ply", "r");
 	poly = new Polyhedron (this_file);
 	fclose(this_file);
 	mat_ident( rotmat );	
