@@ -58,7 +58,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\Opengl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Opengl\include;..\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -76,16 +76,22 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;glut32.lib;glaux.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;opengl32.lib;glu32.lib;glut32.lib;glaux.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/learnply.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\Opengl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Opengl\lib;..\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/learnply.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
+    <PostBuildEvent>
+      <Command>XCOPY "$(SolutionDir)..\shader" "$(TargetDir)\shader\" /S /I /Y
+XCOPY "$(SolutionDir)..\tempmodels" "$(TargetDir)\tempmodels\" /S /I /Y
+XCOPY "$(SolutionDir)glew32.dll" "$(TargetDir)" /I /Y
+XCOPY "$(SolutionDir)glut32.dll" "$(TargetDir)" /I /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -125,12 +131,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\icMatrix.H" />
-    <ClInclude Include="..\srcicVector.H" />
-    <ClInclude Include="..\srclearnply.h" />
-    <ClInclude Include="..\srclearnply_io.h" />
-    <ClInclude Include="..\srcply.h" />
-    <ClInclude Include="..\srctmatrix.h" />
-    <ClInclude Include="..\srctrackball.h" />
+    <ClInclude Include="..\src\icVector.H" />
+    <ClInclude Include="..\src\learnply.h" />
+    <ClInclude Include="..\src\learnply_io.h" />
+    <ClInclude Include="..\src\ply.h" />
+    <ClInclude Include="..\src\tmatrix.h" />
+    <ClInclude Include="..\src\trackball.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\icVector.cpp" />

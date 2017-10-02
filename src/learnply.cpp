@@ -11,8 +11,10 @@ Eugene Zhang, 2005
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #elif defined _WIN32 || defined _WIN64
+#include <GL/glew.h>
 #include "glut.h"
 #endif 
+#include <string>
 #include <string.h>
 #include <fstream>
 #include "ply.h"
@@ -45,6 +47,8 @@ float s_old, t_old;
 float rotmat[4][4];
 static Quaternion rvec;
 
+GLuint vertex_shader, fragment_shader, p;
+
 int mouse_mode = -2;  // -2=no action, -1 = down, 0 = zoom, 1 = rotate x, 2 = rotate y, 3 = tranlate x, 4 = translate y, 5 = cull near 6 = cull far
 int mouse_button = -1; // -1=no button, 0=left, 1=middle, 2=right
 int last_x, last_y;
@@ -70,6 +74,7 @@ void motion(int x, int y);
 void display(void);
 void mouse(int button, int state, int x, int y);
 void display_shape(GLenum mode, Polyhedron *poly);
+void setShader(void);
 
 /******************************************************************************
 Main program.
@@ -83,7 +88,7 @@ int main(int argc, char *argv[])
 
   progname = argv[0];
 
-	this_file = fopen("../tempmodels/bunny.ply", "r");
+	this_file = fopen("tempmodels/bunny.ply", "r");
 	poly = new Polyhedron (this_file);
 	fclose(this_file);
 	mat_ident( rotmat );	
@@ -104,6 +109,9 @@ int main(int argc, char *argv[])
 	glutDisplayFunc(display); 
 	glutMotionFunc (motion);
 	glutMouseFunc (mouse);
+
+	setShader();
+
 	glutMainLoop(); 
 	poly->finalize();  // finalize everything
 
@@ -1540,4 +1548,49 @@ void Polyhedron::average_normals()
 	}
 }
 
+std::string readShader(const char *file)
+{
+	std::string content;
+	std::ifstream fileStream(file, std::ios::in);
 
+	std::string line = "";
+	while (!fileStream.eof()) {
+		std::getline(fileStream, line);
+		content.append(line + "\n");
+	}
+
+	fileStream.close();
+	return content;
+}
+
+void setShader(void)
+{
+	const char *vs = NULL, *fs = NULL;
+
+	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+
+	vs = readShader("shader/minimal.vert").c_str();
+	fs = readShader("shader/minimal.frag").c_str();
+
+	const char * vv = vs;
+	const char * ff = fs;
+
+	glShaderSource(vertex_shader, 1, &vv, NULL);
+	glShaderSource(fragment_shader, 1, &ff, NULL);
+
+	glCompileShader(vertex_shader);
+	glCompileShader(fragment_shader);
+
+	//printShaderInfoLog(vertex_shader);
+	//printShaderInfoLog(fragment_shader);
+
+	p = glCreateProgram();
+	glAttachShader(p, vertex_shader);
+	glAttachShader(p, fragment_shader);
+
+	glLinkProgram(p);
+	//printProgramInfoLog(p);
+
+	glUseProgram(p);
+}
