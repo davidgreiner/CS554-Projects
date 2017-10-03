@@ -8,6 +8,8 @@ Eugene Zhang, 2005
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <vector>
+#include <iostream>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #elif defined _WIN32 || defined _WIN64
@@ -35,7 +37,9 @@ const int win_height=1024;
 
 double radius_factor = 0.9;
 
+int shader_mode = 0; // 0 = off 1 = on
 int collision_mode = 1; //0 =sphere, 1 = aabb, 2=
+int boxing_mode = 0; //0=lines 1=quads
 int draw_mode = 0; // 0 = FILL, 1 = WIREFRAME
 int display_mode = 0; 
 double error_threshold = 1.0e-13;
@@ -110,7 +114,7 @@ int main(int argc, char *argv[])
 	glutMotionFunc (motion);
 	glutMouseFunc (mouse);
 
-	setShader();
+	//setShader();
 
 	glutMainLoop(); 
 	poly->finalize();  // finalize everything
@@ -1087,7 +1091,22 @@ void keyboard(unsigned char key, int x, int y) {
             L_factor = (L_factor >= 1.0) ? 1.0 : L_factor + 0.1;
             display();
             break;
-        case 'w':
+      case 's':
+          if(shader_mode == 0) {
+              setShader();
+              display();
+          } else {
+              glUseProgram(0);
+              glDeleteProgram(p);
+              display();
+          }
+          shader_mode = 1 - shader_mode;
+          break;
+      case 'b':
+          boxing_mode = 1 - boxing_mode;
+          display();
+          break;
+      case 'w':
             draw_mode = 1 - draw_mode;
             display();
             break;
@@ -1419,11 +1438,11 @@ void display_shape(GLenum mode, Polyhedron *this_poly)
                 glNormal3d(temp_t->normal.entry[0], temp_t->normal.entry[1], temp_t->normal.entry[2]);
                 int temp_red = floor((float) temp_v->x / L_factor);
                 float red = (temp_red % 2 == 0) ? 1.0 : 0.0;
-                int temp_blue = floor((float) temp_v->y / L_factor);
-                float blue = (temp_blue % 2 == 0) ? 1.0 : 0.0;
-                int temp_green = floor((float) temp_v->z / L_factor);
+                int temp_green = floor((float) temp_v->y / L_factor);
                 float green = (temp_green % 2 == 0) ? 1.0 : 0.0;
-                glColor3f(red, blue, green);
+                int temp_blue = floor((float) temp_v->z / L_factor);
+                float blue = (temp_blue % 2 == 0) ? 1.0 : 0.0;
+                glColor3f(red, green, blue);
                 glVertex3d(temp_v->x, temp_v->y, temp_v->z);
             }
             glEnd();
@@ -1501,6 +1520,7 @@ void display(void)
               glColor4f(0.0, 0.0, 0.0, 0.2);
               glutSolidSphere(poly->radius, 500, 500);
               break;
+              
           case 1:
               double z_distance = abs(poly->max.z-poly->min.z);
               double y_distance = abs(poly->max.y-poly->min.y);
@@ -1516,7 +1536,10 @@ void display(void)
               };
               int link[6][4] = {{0,2,7,1}, {1,6,3,0}, {0,2,5,3}, {3,5,4,6}, {6,1,7,4}, {4,7,2,5}};
               float color[6][4] = {{1.0,0.0,0.0,0.2},{0.0,1.0,0.0,0.2},{0.0,0.0,1.0,0.2},{1.0,0.0,0.0,0.2},{0.0,0.0,1.0,0.2},{0.0,1.0,0.0,0.2}};
-              glBegin(GL_QUADS);
+              if(boxing_mode == 0)
+                  glBegin(GL_LINE_STRIP);
+              else
+                  glBegin(GL_QUADS);
               for (int a=0; a<6; a++){
                   glColor4f(color[a][0], color[a][1], color[a][2], color[a][3]);
                   glVertex3d(vertices[link[a][0]].x, vertices[link[a][0]].y, vertices[link[a][0]].z);
@@ -1524,6 +1547,11 @@ void display(void)
                   glVertex3d(vertices[link[a][2]].x, vertices[link[a][2]].y, vertices[link[a][2]].z);
                   glVertex3d(vertices[link[a][3]].x, vertices[link[a][3]].y, vertices[link[a][3]].z);
              }
+             if(boxing_mode == 0) {
+                 glColor4f(color[5][0], color[5][1], color[5][2], color[5][3]);
+                 glVertex3d(vertices[0].x, vertices[0].y, vertices[0].z);
+                 glVertex3d(vertices[1].x, vertices[1].y, vertices[1].z);
+              }
              glEnd();
              break;
       }
@@ -1533,7 +1561,7 @@ void display(void)
   glAccum (GL_RETURN, 1.0);
   glFlush();
   glutSwapBuffers();
- 	glFinish();
+  glFinish();
 }
 
 void Polyhedron::average_normals()
@@ -1560,26 +1588,44 @@ std::string readShader(const char *file)
 	}
 
 	fileStream.close();
+    fileStream.clear();
 	return content;
 }
 
 void setShader(void)
 {
-	const char *vs = NULL, *fs = NULL;
-
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	vs = readShader("shader/minimal.vert").c_str();
-	fs = readShader("shader/minimal.frag").c_str();
+    std::string vv = readShader("shader/minimal.vert");
+    const char *vs = vv.c_str();
+    std::string ff = readShader("shader/minimal.frag");
+	const char *fs = ff.c_str();
+    
 
-	const char * vv = vs;
-	const char * ff = fs;
-
-	glShaderSource(vertex_shader, 1, &vv, NULL);
-	glShaderSource(fragment_shader, 1, &ff, NULL);
+	glShaderSource(vertex_shader, 1, &vs, NULL);
+	glShaderSource(fragment_shader, 1, &fs, NULL);
 
 	glCompileShader(vertex_shader);
+    GLint isCompiled = 0;
+    glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &isCompiled);
+    if(isCompiled == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetShaderiv(vertex_shader, GL_INFO_LOG_LENGTH, &maxLength);
+        
+        // The maxLength includes the NULL character
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(vertex_shader, maxLength, &maxLength, &errorLog[0]);
+        
+        for (std::vector<GLchar>::const_iterator i = errorLog.begin(); i != errorLog.end(); ++i)
+            std::cout << *i;
+        
+        // Provide the infolog in whatever manor you deem best.
+        // Exit with failure.
+        glDeleteShader(vertex_shader); // Don't leak the shader.
+        return;
+    }
 	glCompileShader(fragment_shader);
 
 	//printShaderInfoLog(vertex_shader);

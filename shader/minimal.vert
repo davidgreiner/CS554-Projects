@@ -1,9 +1,10 @@
+#version 110
+
+varying vec3 coordinates;
+
 void main()
-{	
-
-	// the following three lines provide the same result
-
-//	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;
-//	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+{
+    gl_FrontColor = gl_Color;
+    coordinates = vec3(0.0, 0.0, 0.0);
 	gl_Position = ftransform();
 }
