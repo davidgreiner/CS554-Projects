@@ -15,7 +15,8 @@ Eugene Zhang, 2005
 #elif defined _WIN32 || defined _WIN64
 #include <GL/glew.h>
 #include "glut.h"
-#endif 
+#endif
+#include <Eigen/Dense>
 #include <string>
 #include <string.h>
 #include <fstream>
@@ -38,13 +39,13 @@ const int win_height=1024;
 double radius_factor = 0.9;
 
 int shader_mode = 0; // 0 = off 1 = on
-int collision_mode = 1; //0 =sphere, 1 = aabb, 2=
+int collision_mode = 1; //0 =sphere, 1 = aabb, 2=first moment, 3 = normal based
 int boxing_mode = 0; //0=lines 1=quads
 int draw_mode = 0; // 0 = FILL, 1 = WIREFRAME
 int display_mode = 0; 
 double error_threshold = 1.0e-13;
 char reg_model_name[128];
-FILE *f;	
+FILE *f;
 int ACSIZE = 1; // for antialiasing
 int view_mode=0;  // 0 = othogonal, 1=perspective
 float s_old, t_old;
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
 	poly->calc_bounding_sphere();
 	poly->calc_face_normals_and_area();
 	poly->average_normals();
+    poly->calc_moments();
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
@@ -847,35 +849,95 @@ void Polyhedron::calc_bounding_sphere()
   radius = length(center - min);
 }
 
-/*
-void Polyhedron::calc_aabb()
-{
-    unsigned int i;
-    icVector3 min, max;
+void Polyhedron::calc_moments() {
+    double sum_vx = 0.0, sum_vy = 0.0, sum_vz = 0.0;
+    for (int i=0; i<nverts; i++) {
+        sum_vx += vlist[i]->x;
+        sum_vy += vlist[i]->y;
+        sum_vz += vlist[i]->z;
+    }
+    sum_vx /= nverts;
+    sum_vy /= nverts;
+    sum_vz /= nverts;
+    gravity_center = icVector3(sum_vx, sum_vy, sum_vz);
     
-    for (i=0; i<nverts; i++) {
-        if (i==0)  {
-            min.set(vlist[i]->x, vlist[i]->y, vlist[i]->z);
-            max.set(vlist[i]->x, vlist[i]->y, vlist[i]->z);
+    Eigen::Matrix3d variance = Eigen::Matrix3d::Zero();
+    Eigen::Matrix3d normal = Eigen::Matrix3d::Zero();
+    
+    for (int i=0;i<nverts;i++) {
+        double x_v = vlist[i]->x - gravity_center.x, y_v = vlist[i]->y - gravity_center.y, z_v = vlist[i]->z - gravity_center.z;
+        double x_n = vlist[i]->normal.x - gravity_center.x, y_n = vlist[i]->normal.y - gravity_center.y, z_n = vlist[i]->normal.z - gravity_center.z;
+        Eigen::Matrix3d temp_v;
+        temp_v << x_v * x_v, x_v * y_v, x_v * z_v,y_v * x_v, y_v * y_v, y_v * z_v,z_v * x_v, z_v * y_v, z_v * z_v;
+        Eigen::Matrix3d temp_n;
+        temp_n << x_n * x_n, x_n * y_n, x_n * z_n,y_n * x_n, y_n * y_n, y_n * z_n,z_n * x_n, z_n * y_n, z_n * z_n;
+        variance += temp_v;
+        normal += temp_n;
+    }
+    Eigen::EigenSolver<Eigen::MatrixXd> es_v(variance);
+    Eigen::EigenSolver<Eigen::MatrixXd> es_n(normal);
+    double *eigen_v = es_v.eigenvectors().real().data();
+    double *eigen_n = es_n.eigenvectors().real().data();
+    
+    double d_x_p = 0.0;
+    double d_x_n = 0.0;
+    double d_y_p = 0.0;
+    double d_y_n = 0.0;
+    double d_z_p = 0.0;
+    double d_z_n = 0.0;
+    
+    for (int i=0;i<nverts;i++) {
+        icVector3 vertex = icVector3(vlist[i]->x, vlist[i]->y, vlist[i]->z);
+        double ev_x = vertex.x * eigen_v[0] + vertex.y * eigen_v[1] + vertex.z * eigen_v[2];
+        double ev_y = vertex.x * eigen_v[3] + vertex.y * eigen_v[4] + vertex.z * eigen_v[5];
+        double ev_z = vertex.x * eigen_v[6] + vertex.y * eigen_v[7] + vertex.z * eigen_v[8];
+        if(ev_x > 0.0) {
+            d_x_p = std::max(d_x_p, ev_x);
+        } else {
+            d_x_n = std::min(d_x_n, ev_x);
         }
-        else {
-            if (vlist[i]->x < min.entry[0])
-                min.entry[0] = vlist[i]->x;
-            if (vlist[i]->x > max.entry[0])
-                max.entry[0] = vlist[i]->x;
-            if (vlist[i]->y < min.entry[1])
-                min.entry[1] = vlist[i]->y;
-            if (vlist[i]->y > max.entry[1])
-                max.entry[1] = vlist[i]->y;
-            if (vlist[i]->z < min.entry[2])
-                min.entry[2] = vlist[i]->z;
-            if (vlist[i]->z > max.entry[2])
-                max.entry[2] = vlist[i]->z;
+        if(ev_y > 0.0) {
+            d_y_p = std::max(d_y_p, ev_y);
+        } else {
+            d_y_n = std::min(d_y_n, ev_y);
+        }
+        if(ev_z > 0.0) {
+            d_z_p = std::max(d_z_p, ev_z);
+        } else {
+            d_z_n = std::min(d_z_n, ev_z);
         }
     }
     
+    double n_x_p = 0.0;
+    double n_x_n = 0.0;
+    double n_y_p = 0.0;
+    double n_y_n = 0.0;
+    double n_z_p = 0.0;
+    double n_z_n = 0.0;
+    
+    for (int i=0;i<nverts;i++) {
+        icVector3 vertex = icVector3(vlist[i]->x, vlist[i]->y, vlist[i]->z);
+        double ev_x = vertex.x * eigen_n[0] + vertex.y * eigen_n[1] + vertex.z * eigen_n[2];
+        double ev_y = vertex.x * eigen_n[3] + vertex.y * eigen_n[4] + vertex.z * eigen_n[5];
+        double ev_z = vertex.x * eigen_n[6] + vertex.y * eigen_n[7] + vertex.z * eigen_n[8];
+        if(ev_x > 0.0) {
+            n_x_p = std::max(n_x_p, ev_x);
+        } else {
+            n_x_n = std::min(n_x_n, ev_x);
+        }
+        if(ev_y > 0.0) {
+            n_y_p = std::max(n_y_p, ev_y);
+        } else {
+            n_y_n = std::min(n_y_n, ev_y);
+        }
+        if(ev_z > 0.0) {
+            n_z_p = std::max(n_z_p, ev_z);
+        } else {
+            n_z_n = std::min(n_z_n, ev_z);
+        }
+    }
 }
-*/
+
 void Polyhedron::calc_edge_length()
 {
 	int i;
@@ -1106,6 +1168,12 @@ void keyboard(unsigned char key, int x, int y) {
           boxing_mode = 1 - boxing_mode;
           display();
           break;
+      case 'c':
+          if(collision_mode >= 3) {
+              collision_mode = 0;
+          } else {
+              collision_mode += 1;
+          }
       case 'w':
             draw_mode = 1 - draw_mode;
             display();
@@ -1516,12 +1584,13 @@ void display(void)
       glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
       switch(collision_mode)
       {
-          case 0:
+          case 0: {
               glColor4f(0.0, 0.0, 0.0, 0.2);
               glutSolidSphere(poly->radius, 500, 500);
               break;
+          }
               
-          case 1:
+          case 1: {
               double z_distance = abs(poly->max.z-poly->min.z);
               double y_distance = abs(poly->max.y-poly->min.y);
               double x_distance = abs(poly->max.x-poly->min.x);
@@ -1554,6 +1623,17 @@ void display(void)
               }
              glEnd();
              break;
+          }
+          case 2:
+          {
+              
+              break;
+          }
+          case 3:
+          {
+              
+              break;
+          }
       }
     glPopMatrix ();
     glAccum(GL_ACCUM, 1.0/ACSIZE);

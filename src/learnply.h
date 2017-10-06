@@ -12,6 +12,7 @@ Eugene Zhang 2005
 
 #include "ply.h"
 #include "icVector.H"
+#include <Eigen/Dense>
 
 const double EPS = 1.0e-6;
 const double PI=3.1415926535898;
@@ -169,6 +170,17 @@ public:
 	}
 };
 
+class Corner {
+public:
+    int index;
+    Vertex *vertex;
+    Edge *edge;
+    Triangle *triangle;
+    Corner *n, *p, *o;
+    
+    double angle;
+};
+
 class Polyhedron {
 public:
 
@@ -187,6 +199,7 @@ public:
   int max_edges;
 
 	icVector3 center;
+    icVector3 gravity_center;
 	double radius;
 	double area;
     
@@ -206,7 +219,7 @@ public:
   Triangle *find_common_edge(Triangle *, Vertex *, Vertex *);
   Triangle *other_triangle(Edge *, Triangle *);
 	void calc_bounding_sphere();
-    void calc_aabb();
+    void calc_moments();
 	void calc_face_normals_and_area();
 	void calc_edge_length();
 
